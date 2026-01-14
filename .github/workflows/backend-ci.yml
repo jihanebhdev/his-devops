@@ -61,7 +61,7 @@ jobs:
       
       - name: Run tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/his_db_test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8mb4&useUnicode=true
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/his_db_test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true
           SPRING_DATASOURCE_USERNAME: test_user
           SPRING_DATASOURCE_PASSWORD: test_password
           SPRING_PROFILES_ACTIVE: test

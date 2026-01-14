@@ -1,4 +1,4 @@
-# 🚀 Fresh Start Guide - From Zero to Deploy
+# 🚀 Start Guide - From Zero to Deploy
 
 Complete setup guide for someone who just installed Docker and created a GitHub account.
 
@@ -33,7 +33,7 @@ Docker version 24.0.0 or higher
 Docker Compose version 2.20.0 or higher
 ```
 
-### 1.2 Install Git (if not installed)
+### 1.2 Install Git (if not installed) !
 
 **Windows:**
 ```bash
@@ -41,17 +41,7 @@ Docker Compose version 2.20.0 or higher
 # Run installer with default options
 ```
 
-**Mac:**
-```bash
-# Install via Homebrew
-brew install git
-```
 
-**Linux:**
-```bash
-sudo apt-get install git  # Ubuntu/Debian
-sudo yum install git      # CentOS/RHEL
-```
 
 ### 1.3 Verify Git Installation
 
@@ -69,29 +59,12 @@ git config --global user.email "your-email@example.com"
 
 ---
 
-## 🐙 STEP 2: Create GitHub Repository (5 minutes)
+## 🐙 STEP 2: Clone GitHub Repository (5 minutes)
 
-### 2.1 Create New Repository on GitHub
+### 2.1 Clone New Repository on GitHub
 
-1. Go to https://github.com
-2. Click **"+"** (top right) → **"New repository"**
-3. Fill in details:
-   - **Repository name:** `his-devops`
-   - **Description:** `HIS Hospital Information System - DevOps Implementation`
-   - **Visibility:** ✅ Private (recommended) or Public
-   - **❌ DO NOT** initialize with README, .gitignore, or license
-4. Click **"Create repository"**
-
-### 2.2 Save Repository Information
-
-After creation, you'll see:
-```
-https://github.com/YOUR_USERNAME/his-devops.git
-```
-
-**Save this URL!** You'll need it in Step 4.
-
----
+1. Go to https://github.com 
+or git clone https://github.com/jihanebhdev/his-devops.git
 
 ## 💻 STEP 3: Prepare Your Local Project (2 minutes)
 
@@ -99,11 +72,11 @@ https://github.com/YOUR_USERNAME/his-devops.git
 
 ```bash
 # Open terminal/PowerShell
-# Navigate to your project directory
-cd C:\Users\oelahmadi\Documents\microservices\devops
+# Navigate to your project directory clones 
+cd /devops
 
 # Or on Mac/Linux:
-cd ~/Documents/microservices/devops
+cd /devops
 ```
 
 ### 3.2 Verify Project Structure
@@ -111,7 +84,6 @@ cd ~/Documents/microservices/devops
 ```bash
 # List files to verify structure
 dir  # Windows
-ls   # Mac/Linux
 
 # You should see:
 # - hub/
@@ -125,29 +97,6 @@ ls   # Mac/Linux
 ---
 
 ## 📤 STEP 4: Push to GitHub (5 minutes)
-
-### 4.1 Initialize Git Repository
-
-```bash
-# Initialize git (if not already done)
-git init
-
-# Check current branch name
-git branch
-
-# If branch is 'master', rename to 'main'
-git branch -M main
-```
-
-### 4.2 Add All Files
-
-```bash
-# Add all files to git
-git add .
-
-# Verify what will be committed
-git status
-```
 
 ### 4.3 Create First Commit
 
@@ -172,72 +121,15 @@ git remote -v
 # Push to main branch
 git push -u origin main
 ```
-
 **If prompted for credentials:**
 - **Username:** Your GitHub username
 - **Password:** Use **Personal Access Token** (not password)
-  - Create token: GitHub → Settings → Developer settings → Personal access tokens → Generate new token
-  - Select scopes: `repo`, `workflow`, `write:packages`
-
 ---
 
-## 🔐 STEP 5: Configure GitHub Secrets (3 minutes)
-
-### 5.1 Generate SonarQube Token (Optional for now)
-
-For local development, you can skip SonarQube. For full CI/CD:
-
-1. Set up SonarQube Cloud: https://sonarcloud.io
-2. Create organization and projects
-3. Generate token
-
-### 5.2 Add GitHub Secrets
-
-1. Go to your repository on GitHub
-2. Click **Settings** → **Secrets and variables** → **Actions**
-3. Click **"New repository secret"**
-4. Add these secrets (for full CI/CD):
-
-| Secret Name | Value | Required Now? |
-|------------|-------|---------------|
-| `SONAR_TOKEN` | Your SonarQube token | No (optional) |
-| `SONAR_HOST_URL` | `https://sonarcloud.io` | No (optional) |
-| `SLACK_WEBHOOK` | Your Slack webhook URL | No (optional) |
-
-**For initial setup, you can skip these and add them later!**
-
----
 
 ## 🐳 STEP 6: Deploy Locally with Docker (5 minutes)
 
 ### 6.1 Create Environment File
-
-```bash
-# Copy example environment file
-cp env.example .env
-
-# Windows PowerShell:
-Copy-Item env.example .env
-```
-
-### 6.2 Edit .env File
-
-Open `.env` in any text editor and update:
-
-```env
-# Leave these as default for local testing
-MYSQL_ROOT_PASSWORD=root
-MYSQL_DATABASE=his_db
-MYSQL_USER=his_user
-MYSQL_PASSWORD=his_password
-
-# Ports (change if already in use)
-MYSQL_PORT=3306
-HUB_PORT=8080
-FRONT_PORT=3000
-PROMETHEUS_PORT=9090
-GRAFANA_PORT=3001
-```
 
 ### 6.3 Start All Services
 
