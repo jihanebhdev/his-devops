@@ -36,8 +36,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --character-set-server=utf8mb4
-          --collation-server=utf8mb4_unicode_ci
     
     steps:
       - name: Checkout code
@@ -51,9 +49,19 @@ jobs:
           cache: maven
           cache-dependency-path: hub/hub/pom.xml
       
+      - name: Wait for MySQL to be ready
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+          until mysqladmin ping -h 127.0.0.1 -u root -ptest_root_password --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+          echo "MySQL is ready!"
+      
       - name: Run tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/his_db_test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/his_db_test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&characterEncoding=utf8mb4&useUnicode=true
           SPRING_DATASOURCE_USERNAME: test_user
           SPRING_DATASOURCE_PASSWORD: test_password
           SPRING_PROFILES_ACTIVE: test
