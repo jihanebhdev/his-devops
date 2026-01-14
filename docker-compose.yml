@@ -3,8 +3,6 @@
 # Complete stack deployment
 # ============================================================================
 
-version: '3.8'
-
 networks:
   his-network:
     driver: bridge

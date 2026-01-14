@@ -13,8 +13,6 @@ WORKDIR /app
 
 # Copy Maven configuration
 COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
 
 # Download dependencies (cached layer)
 RUN mvn dependency:go-offline -B
