@@ -1,0 +1,45 @@
+# ============================================================================
+# HIS DevOps - Docker Compose Development Override
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+# ============================================================================
+
+version: '3.8'
+
+services:
+  hub:
+    build:
+      context: ./hub/hub
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      LOGGING_LEVEL_COM_HIS: DEBUG
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+    volumes:
+      - ./hub/hub/src:/app/src:ro
+    command: sh -c "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar"
+    ports:
+      - "8080:8080"
+      - "5005:5005"  # Debug port
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      target: builder
+    environment:
+      NODE_ENV: development
+      REACT_APP_API_URL: http://localhost:8080/api
+    volumes:
+      - ./front/src:/app/src:ro
+      - ./front/public:/app/public:ro
+    command: npm start
+    ports:
+      - "3000:3000"
+
+  mysql:
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: his_db_dev
+

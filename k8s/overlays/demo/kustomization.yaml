@@ -1,0 +1,77 @@
+# ============================================================================
+# HIS - Kustomize DEMO Environment (Production-like)
+# ============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: his-demo
+
+bases:
+  - ../../base
+
+namePrefix: demo-
+
+commonLabels:
+  environment: demo
+  version: stable
+
+replicas:
+  - name: hub
+    count: 3
+  - name: front
+    count: 3
+
+images:
+  - name: ghcr.io/YOUR_ORG/his-hub
+    newTag: v1.0.0
+  - name: ghcr.io/YOUR_ORG/his-front
+    newTag: v1.0.0
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 512Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 2Gi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 2000m
+    target:
+      kind: Deployment
+      name: hub
+  
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: his-demo.example.com
+      - op: replace
+        path: /spec/rules/1/host
+        value: api-demo.example.com
+    target:
+      kind: Ingress
+      name: his-ingress
+  
+  - patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 3
+      - op: replace
+        path: /spec/maxReplicas
+        value: 15
+    target:
+      kind: HorizontalPodAutoscaler
+      name: hub-hpa
+
+configMapGenerator:
+  - name: hub-config
+    behavior: merge
+    literals:
+      - SPRING_PROFILES_ACTIVE=prod
+      - LOGGING_LEVEL_COM_HIS=WARN
+

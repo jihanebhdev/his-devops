@@ -1,0 +1,98 @@
+# ============================================================================
+# HIS - Prometheus Configuration
+# ============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'his-cluster'
+    environment: 'dev'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - 'alerts.yml'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # Hub Backend - Spring Boot
+  - job_name: 'his-hub'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['hub:8080']
+        labels:
+          service: 'hub'
+          tier: 'backend'
+    # Kubernetes service discovery (uncomment when deploying to K8s)
+    # kubernetes_sd_configs:
+    #   - role: pod
+    #     namespaces:
+    #       names:
+    #         - his-dev
+    #         - his-test
+    #         - his-demo
+    # relabel_configs:
+    #   - source_labels: [__meta_kubernetes_pod_label_app]
+    #     action: keep
+    #     regex: hub
+    #   - source_labels: [__meta_kubernetes_pod_name]
+    #     action: replace
+    #     target_label: pod
+    #   - source_labels: [__meta_kubernetes_namespace]
+    #     action: replace
+    #     target_label: namespace
+
+  # MySQL Database
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql-exporter:9104']
+        labels:
+          service: 'mysql'
+          tier: 'database'
+
+  # Node Exporter (for host metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'
+          tier: 'infrastructure'
+
+  # cAdvisor (for container metrics)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+          tier: 'infrastructure'
+
+  # Nginx Ingress Controller
+  - job_name: 'nginx-ingress'
+    static_configs:
+      - targets: ['nginx-ingress-controller:10254']
+        labels:
+          service: 'nginx-ingress'
+          tier: 'infrastructure'
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+          tier: 'monitoring'
+

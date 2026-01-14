@@ -1,0 +1,31 @@
+# ============================================================================
+# HIS - Kubernetes Namespace
+# ============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: his-dev
+  labels:
+    name: his-dev
+    environment: development
+    project: his
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: his-test
+  labels:
+    name: his-test
+    environment: testing
+    project: his
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: his-demo
+  labels:
+    name: his-demo
+    environment: demo
+    project: his
+

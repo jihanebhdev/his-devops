@@ -1,0 +1,45 @@
+# ============================================================================
+# HIS Hub - Docker Ignore
+# ============================================================================
+
+# Build output
+target/
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+docs/
+
+# CI/CD
+.github/
+Jenkinsfile
+
+# Logs
+*.log
+logs/
+
+# Test
+test/
+*.test.*
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# OS
+.DS_Store
+Thumbs.db
+

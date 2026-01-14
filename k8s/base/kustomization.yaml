@@ -1,0 +1,28 @@
+# ============================================================================
+# HIS - Kustomize Base Configuration
+# ============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: his-dev
+
+resources:
+  - namespace.yaml
+  - mysql-deployment.yaml
+  - hub-deployment.yaml
+  - front-deployment.yaml
+  - ingress.yaml
+  - network-policy.yaml
+
+commonLabels:
+  app.kubernetes.io/name: his
+  app.kubernetes.io/part-of: his-system
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: ghcr.io/YOUR_ORG/his-hub
+    newTag: latest
+  - name: ghcr.io/YOUR_ORG/his-front
+    newTag: latest
+

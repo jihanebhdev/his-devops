@@ -1,0 +1,50 @@
+# ============================================================================
+# HIS DevOps Project - Root .gitignore
+# ============================================================================
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Secrets
+secrets/
+*.pem
+*.key
+!*.pub
+
+# Build outputs (will be in subdirectories)
+dist/
+build/
+target/
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+*.lcov
+
+# Kubernetes secrets (we'll use sealed-secrets in production)
+k8s/secrets/*.yaml
+!k8s/secrets/*.example.yaml
+

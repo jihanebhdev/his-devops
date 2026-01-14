@@ -1,0 +1,30 @@
+.App {
+  min-height: 100vh;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+.MuiTableContainer-root {
+  border-radius: 8px;
+  overflow: hidden;
+}
+.MuiTableRow-root:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.MuiCard-root {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.MuiCard-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

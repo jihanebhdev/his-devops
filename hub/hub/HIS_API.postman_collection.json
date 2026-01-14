@@ -1,0 +1,1086 @@
+{
+	"info": {
+		"_postman_id": "his-api-collection",
+		"name": "HIS API - Hospital Information System",
+		"description": "Complete API collection for Hospital Information System (HIS) - MVP\n\n**Base URL**: http://localhost:8080\n\n**Authentication**: JWT Bearer Token\n\n**Default Users**:\n- admin / password123 (ADMINISTRATEUR)\n- agent1 / password123 (AGENT_ACCUEIL)\n- medecin1 / password123 (MEDECIN)\n- infirmier1 / password123 (INFIRMIER)\n- comptable1 / password123 (COMPTABLE)\n- directeur1 / password123 (DIRECTEUR)\n\n**New Features**:\n- Password Management (change, forgot, reset)\n- Profile Self-Update\n- Statistics Dashboard\n- Notifications Module\n- Audit Trail\n- Document Management\n- Reports\n- Get All endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        pm.collectionVariables.set('token', jsonData.data.token);",
+									"        pm.collectionVariables.set('username', jsonData.data.username);",
+									"        console.log('Token saved successfully');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "logout"]
+						}
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+						},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword456\",\n  \"confirmPassword\": \"newpassword456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/change-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "change-password"]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@hospital.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "forgot-password"]
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"your-reset-token-here\",\n  \"newPassword\": \"newpassword456\",\n  \"confirmPassword\": \"newpassword456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "reset-password"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Users Management",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs"]}
+					}
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/mon-profil", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "mon-profil"]}
+					}
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Updated Name\",\n  \"prenom\": \"Updated First\",\n  \"email\": \"updated@email.com\",\n  \"telephone\": \"0612345678\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/mon-profil", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "mon-profil"]}
+					}
+				},
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/medecins", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "medecins"]}
+					}
+				},
+				{
+					"name": "Get All Nurses",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/infirmiers", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "infirmiers"]}
+					}
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/1", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "1"]}
+					}
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"nom\": \"Doe\",\n  \"prenom\": \"John\",\n  \"email\": \"john.doe@email.com\",\n  \"telephone\": \"0612345678\",\n  \"roleIds\": [2]\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs"]}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"updateduser\",\n  \"nom\": \"Doe\",\n  \"prenom\": \"John Updated\",\n  \"email\": \"john.updated@email.com\",\n  \"telephone\": \"0612345678\",\n  \"roleIds\": [2, 3]\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/1", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "1"]}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/utilisateurs/1", "host": ["{{baseUrl}}"], "path": ["api", "utilisateurs", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Statistics Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Stats",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/stats/dashboard", "host": ["{{baseUrl}}"], "path": ["api", "stats", "dashboard"]}
+					}
+				},
+				{
+					"name": "Get Patient Stats",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/stats/patients", "host": ["{{baseUrl}}"], "path": ["api", "stats", "patients"]}
+					}
+				},
+				{
+					"name": "Get Appointment Stats",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/stats/rendezvous", "host": ["{{baseUrl}}"], "path": ["api", "stats", "rendezvous"]}
+					}
+				},
+				{
+					"name": "Get Financial Stats",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/stats/facturation", "host": ["{{baseUrl}}"], "path": ["api", "stats", "facturation"]}
+					}
+				},
+				{
+					"name": "Get Occupation Stats",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/stats/occupation", "host": ["{{baseUrl}}"], "path": ["api", "stats", "occupation"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Notifications",
+			"item": [
+				{
+					"name": "Get My Notifications",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/notifications", "host": ["{{baseUrl}}"], "path": ["api", "notifications"]}
+					}
+				},
+				{
+					"name": "Get Unread Notifications",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/notifications/unread", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "unread"]}
+					}
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/notifications/unread-count", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "unread-count"]}
+					}
+				},
+				{
+					"name": "Create Notification (Admin)",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"utilisateurId\": 1,\n  \"titre\": \"Test Notification\",\n  \"message\": \"This is a test notification\",\n  \"type\": \"INFO\",\n  \"categorie\": \"SYSTEME\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/notifications", "host": ["{{baseUrl}}"], "path": ["api", "notifications"]}
+					}
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PATCH",
+						"url": {"raw": "{{baseUrl}}/api/notifications/1/read", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "1", "read"]}
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PATCH",
+						"url": {"raw": "{{baseUrl}}/api/notifications/read-all", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "read-all"]}
+					}
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/notifications/1", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "1"]}
+					}
+				},
+				{
+					"name": "Delete Read Notifications",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/notifications/read", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "read"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Audit Trail",
+			"item": [
+				{
+					"name": "Get All Audit Logs",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/audit/logs?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["api", "audit", "logs"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "20"}]}
+					}
+				},
+				{
+					"name": "Get Audit Log By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/audit/logs/1", "host": ["{{baseUrl}}"], "path": ["api", "audit", "logs", "1"]}
+					}
+				},
+				{
+					"name": "Get Audit Logs By User",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/audit/utilisateur/1", "host": ["{{baseUrl}}"], "path": ["api", "audit", "utilisateur", "1"]}
+					}
+				},
+				{
+					"name": "Get Audit Logs For Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/audit/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "audit", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Get Audit Logs By Action",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/audit/action/CREATE", "host": ["{{baseUrl}}"], "path": ["api", "audit", "action", "CREATE"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Documents",
+			"item": [
+				{
+					"name": "Get All Documents",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/documents", "host": ["{{baseUrl}}"], "path": ["api", "documents"]}
+					}
+				},
+				{
+					"name": "Get Document By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/documents/1", "host": ["{{baseUrl}}"], "path": ["api", "documents", "1"]}
+					}
+				},
+				{
+					"name": "Get Documents By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/documents/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "documents", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Download Document",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/documents/1/download", "host": ["{{baseUrl}}"], "path": ["api", "documents", "1", "download"]}
+					}
+				},
+				{
+					"name": "Delete Document",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/documents/1", "host": ["{{baseUrl}}"], "path": ["api", "documents", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Reports",
+			"item": [
+				{
+					"name": "Get Patient Summary Report",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/reports/patient/1/summary", "host": ["{{baseUrl}}"], "path": ["api", "reports", "patient", "1", "summary"]}
+					}
+				},
+				{
+					"name": "Export Patient Summary",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/reports/patient/1/summary/export", "host": ["{{baseUrl}}"], "path": ["api", "reports", "patient", "1", "summary", "export"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Patients",
+			"item": [
+				{
+					"name": "Get All Patients",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api", "patients"]}
+					}
+				},
+				{
+					"name": "Get Patient By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/patients/1", "host": ["{{baseUrl}}"], "path": ["api", "patients", "1"]}
+					}
+				},
+				{
+					"name": "Search Patients",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/patients/recherche?q=Ahmed", "host": ["{{baseUrl}}"], "path": ["api", "patients", "recherche"], "query": [{"key": "q", "value": "Ahmed"}]}
+					}
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Test\",\n  \"prenom\": \"Patient\",\n  \"dateNaissance\": \"1990-01-15\",\n  \"sexe\": \"MASCULIN\",\n  \"numeroIdentification\": \"TEST123456\",\n  \"adresse\": \"123 Test Street\",\n  \"telephone\": \"0612345678\",\n  \"email\": \"test.patient@email.com\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api", "patients"]}
+					}
+				},
+				{
+					"name": "Create Patient with User Account",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Patient\",\n  \"prenom\": \"Test\",\n  \"dateNaissance\": \"1990-01-15\",\n  \"sexe\": \"MASCULIN\",\n  \"numeroIdentification\": \"PATIENT123\",\n  \"adresse\": \"123 Test Street\",\n  \"telephone\": \"0612345678\",\n  \"email\": \"patient.test@email.com\",\n  \"creerCompteUtilisateur\": true,\n  \"username\": \"patient1\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api", "patients"]}
+					}
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nom\": \"Patient Updated\",\n  \"prenom\": \"Test\",\n  \"dateNaissance\": \"1990-01-15\",\n  \"sexe\": \"MASCULIN\",\n  \"numeroIdentification\": \"PATIENT123\",\n  \"adresse\": \"123 Test Street Updated\",\n  \"telephone\": \"0612345678\",\n  \"email\": \"patient.test@email.com\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/patients/1", "host": ["{{baseUrl}}"], "path": ["api", "patients", "1"]}
+					}
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/patients/1", "host": ["{{baseUrl}}"], "path": ["api", "patients", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Rendez-vous",
+			"item": [
+				{
+					"name": "Get All Rendez-vous",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous"]}
+					}
+				},
+				{
+					"name": "Get Today's Rendez-vous",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/today", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "today"]}
+					}
+				},
+				{
+					"name": "Get Upcoming Rendez-vous",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/upcoming", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "upcoming"]}
+					}
+				},
+				{
+					"name": "Get Rendez-vous By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/1", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "1"]}
+					}
+				},
+				{
+					"name": "Get Rendez-vous By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Get Rendez-vous By Medecin",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/medecin/3", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "medecin", "3"]}
+					}
+				},
+				{
+					"name": "Create Rendez-vous",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"medecinId\": 3,\n  \"dateHeure\": \"2025-12-25T10:00:00\",\n  \"motif\": \"Consultation générale\",\n  \"notes\": \"Première consultation\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/rendezvous", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous"]}
+					}
+				},
+				{
+					"name": "Change Rendez-vous Status",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PATCH",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/1/statut?statut=CONFIRME", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "1", "statut"], "query": [{"key": "statut", "value": "CONFIRME"}]}
+					}
+				},
+				{
+					"name": "Delete Rendez-vous",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/rendezvous/1", "host": ["{{baseUrl}}"], "path": ["api", "rendezvous", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Consultations",
+			"item": [
+				{
+					"name": "Get All Consultations",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/consultations", "host": ["{{baseUrl}}"], "path": ["api", "consultations"]}
+					}
+				},
+				{
+					"name": "Get Consultation By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/consultations/1", "host": ["{{baseUrl}}"], "path": ["api", "consultations", "1"]}
+					}
+				},
+				{
+					"name": "Get Consultations By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/consultations/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "consultations", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Get Consultations By Medecin",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/consultations/medecin/3", "host": ["{{baseUrl}}"], "path": ["api", "consultations", "medecin", "3"]}
+					}
+				},
+				{
+					"name": "Create Consultation",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"medecinId\": 3,\n  \"dateHeure\": \"2025-12-21T10:00:00\",\n  \"motif\": \"Consultation générale\",\n  \"examenClinique\": \"RAS\",\n  \"diagnostic\": \"Bonne santé\",\n  \"prescription\": \"Aucune\",\n  \"recommandations\": \"Continuer\",\n  \"typeConsultation\": \"CONSULTATION_GENERALE\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/consultations", "host": ["{{baseUrl}}"], "path": ["api", "consultations"]}
+					}
+				},
+				{
+					"name": "Delete Consultation",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/consultations/1", "host": ["{{baseUrl}}"], "path": ["api", "consultations", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Dossiers Medicaux",
+			"item": [
+				{
+					"name": "Get All Dossiers Medicaux",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/dossiers", "host": ["{{baseUrl}}"], "path": ["api", "dossiers"]}
+					}
+				},
+				{
+					"name": "Get Dossier By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/dossiers/1", "host": ["{{baseUrl}}"], "path": ["api", "dossiers", "1"]}
+					}
+				},
+				{
+					"name": "Get Dossier By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/dossiers/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "dossiers", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Create Dossier Medical",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"historiqueMedical\": \"Antécédents du patient\",\n  \"notesCliniques\": \"Notes importantes\",\n  \"groupeSanguin\": \"A\",\n  \"rhesus\": \"POSITIF\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/dossiers", "host": ["{{baseUrl}}"], "path": ["api", "dossiers"]}
+					}
+				},
+				{
+					"name": "Update Dossier Medical",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"historiqueMedical\": \"Antécédents du patient mis à jour\",\n  \"notesCliniques\": \"Notes importantes mises à jour\",\n  \"groupeSanguin\": \"A\",\n  \"rhesus\": \"POSITIF\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/dossiers/1", "host": ["{{baseUrl}}"], "path": ["api", "dossiers", "1"]}
+					}
+				},
+				{
+					"name": "Delete Dossier Medical",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/dossiers/1", "host": ["{{baseUrl}}"], "path": ["api", "dossiers", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "12. Hospitalisations",
+			"item": [
+				{
+					"name": "Get All Hospitalisations",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/hospitalisations", "host": ["{{baseUrl}}"], "path": ["api", "hospitalisations"]}
+					}
+				},
+				{
+					"name": "Get Hospitalisations En Cours",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/hospitalisations/en-cours", "host": ["{{baseUrl}}"], "path": ["api", "hospitalisations", "en-cours"]}
+					}
+				},
+				{
+					"name": "Get Hospitalisation By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/hospitalisations/1", "host": ["{{baseUrl}}"], "path": ["api", "hospitalisations", "1"]}
+					}
+				},
+				{
+					"name": "Create Hospitalisation",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"medecinId\": 3,\n  \"litId\": 1,\n  \"dateAdmission\": \"2025-12-21T10:00:00\",\n  \"motifAdmission\": \"Observation\",\n  \"diagnostic\": \"À déterminer\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/hospitalisations", "host": ["{{baseUrl}}"], "path": ["api", "hospitalisations"]}
+					}
+				},
+				{
+					"name": "Enregistrer Sortie",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PATCH",
+						"url": {"raw": "{{baseUrl}}/api/hospitalisations/1/sortie?notesSortie=Patient guéri", "host": ["{{baseUrl}}"], "path": ["api", "hospitalisations", "1", "sortie"], "query": [{"key": "notesSortie", "value": "Patient guéri"}]}
+					}
+				},
+				{
+					"name": "Delete Hospitalisation",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/hospitalisations/1", "host": ["{{baseUrl}}"], "path": ["api", "hospitalisations", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "13. Factures",
+			"item": [
+				{
+					"name": "Get All Factures",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/factures", "host": ["{{baseUrl}}"], "path": ["api", "factures"]}
+					}
+				},
+				{
+					"name": "Get Factures Impayees",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/factures/impayees", "host": ["{{baseUrl}}"], "path": ["api", "factures", "impayees"]}
+					}
+				},
+				{
+					"name": "Get Facture By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/factures/1", "host": ["{{baseUrl}}"], "path": ["api", "factures", "1"]}
+					}
+				},
+				{
+					"name": "Get Factures By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/factures/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "factures", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Create Facture",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"dateFacturation\": \"2025-12-21T10:00:00\",\n  \"lignesFacture\": [\n    {\"description\": \"Consultation\", \"quantite\": 1, \"prixUnitaire\": 200.0},\n    {\"description\": \"Analyse\", \"quantite\": 1, \"prixUnitaire\": 150.0}\n  ]\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/factures", "host": ["{{baseUrl}}"], "path": ["api", "factures"]}
+					}
+				},
+				{
+					"name": "Delete Facture",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/factures/1", "host": ["{{baseUrl}}"], "path": ["api", "factures", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "14. Paiements",
+			"item": [
+				{
+					"name": "Get All Paiements",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/paiements", "host": ["{{baseUrl}}"], "path": ["api", "paiements"]}
+					}
+				},
+				{
+					"name": "Get Paiement By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/paiements/1", "host": ["{{baseUrl}}"], "path": ["api", "paiements", "1"]}
+					}
+				},
+				{
+					"name": "Get Paiements By Facture",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/paiements/facture/1", "host": ["{{baseUrl}}"], "path": ["api", "paiements", "facture", "1"]}
+					}
+				},
+				{
+					"name": "Get Paiements By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/paiements/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "paiements", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Create Paiement",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"factureId\": 1,\n  \"montant\": 200.0,\n  \"datePaiement\": \"2025-12-21T15:00:00\",\n  \"modePaiement\": \"CARTE_BANCAIRE\",\n  \"referenceTransaction\": \"TXN-123\",\n  \"notes\": \"Paiement complet\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/paiements", "host": ["{{baseUrl}}"], "path": ["api", "paiements"]}
+					}
+				},
+				{
+					"name": "Delete Paiement",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/paiements/1", "host": ["{{baseUrl}}"], "path": ["api", "paiements", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "15. Lits",
+			"item": [
+				{
+					"name": "Get All Lits",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/lits", "host": ["{{baseUrl}}"], "path": ["api", "lits"]}
+					}
+				},
+				{
+					"name": "Get Lits Disponibles",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/lits/disponibles", "host": ["{{baseUrl}}"], "path": ["api", "lits", "disponibles"]}
+					}
+				},
+				{
+					"name": "Get Lit By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/lits/1", "host": ["{{baseUrl}}"], "path": ["api", "lits", "1"]}
+					}
+				},
+				{
+					"name": "Create Lit",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"url": {"raw": "{{baseUrl}}/api/lits?numeroLit=LIT-101&service=Cardiologie&chambre=101&notes=Lit standard", "host": ["{{baseUrl}}"], "path": ["api", "lits"], "query": [{"key": "numeroLit", "value": "LIT-101"}, {"key": "service", "value": "Cardiologie"}, {"key": "chambre", "value": "101"}, {"key": "notes", "value": "Lit standard"}]}
+					}
+				},
+				{
+					"name": "Update Lit",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PUT",
+						"url": {"raw": "{{baseUrl}}/api/lits/1?numeroLit=LIT-101&service=Cardiologie&chambre=101&statut=DISPONIBLE&notes=Lit standard mis à jour", "host": ["{{baseUrl}}"], "path": ["api", "lits", "1"], "query": [{"key": "numeroLit", "value": "LIT-101"}, {"key": "service", "value": "Cardiologie"}, {"key": "chambre", "value": "101"}, {"key": "statut", "value": "DISPONIBLE"}, {"key": "notes", "value": "Lit standard mis à jour"}]}
+					}
+				},
+				{
+					"name": "Delete Lit",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/lits/1", "host": ["{{baseUrl}}"], "path": ["api", "lits", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "16. Constantes Vitales",
+			"item": [
+				{
+					"name": "Get Constantes By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/constantes/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "constantes", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Create Constantes Vitales",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"patientId\": 1,\n  \"infirmierId\": 4,\n  \"dateHeure\": \"2025-12-21T08:00:00\",\n  \"temperature\": 37.2,\n  \"tensionArterielleSystolique\": 120,\n  \"tensionArterielleDiastolique\": 80,\n  \"frequenceCardiaque\": 72,\n  \"frequenceRespiratoire\": 16,\n  \"poids\": 75.5,\n  \"taille\": 175.0,\n  \"saturationOxygene\": 98.0\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/constantes", "host": ["{{baseUrl}}"], "path": ["api", "constantes"]}
+					}
+				},
+				{
+					"name": "Delete Constantes Vitales",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/constantes/1", "host": ["{{baseUrl}}"], "path": ["api", "constantes", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "17. Suivis Hospitaliers",
+			"item": [
+				{
+					"name": "Get Suivi By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/suivis/1", "host": ["{{baseUrl}}"], "path": ["api", "suivis", "1"]}
+					}
+				},
+				{
+					"name": "Get Suivis By Hospitalisation",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/suivis/hospitalisation/1", "host": ["{{baseUrl}}"], "path": ["api", "suivis", "hospitalisation", "1"]}
+					}
+				},
+				{
+					"name": "Create Suivi",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hospitalisationId\": 1,\n  \"infirmierId\": 4,\n  \"dateHeure\": \"2025-12-21T09:00:00\",\n  \"observations\": \"Patient stable\",\n  \"soinsAdministres\": \"Pansement changé\",\n  \"medicaments\": \"Paracétamol 500mg\",\n  \"etatPatient\": \"Stable\"\n}"
+						},
+						"url": {"raw": "{{baseUrl}}/api/suivis", "host": ["{{baseUrl}}"], "path": ["api", "suivis"]}
+					}
+				},
+				{
+					"name": "Delete Suivi",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/suivis/1", "host": ["{{baseUrl}}"], "path": ["api", "suivis", "1"]}
+					}
+				}
+			]
+		},
+		{
+			"name": "18. Assurances",
+			"item": [
+				{
+					"name": "Get All Assurances",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/assurances", "host": ["{{baseUrl}}"], "path": ["api", "assurances"]}
+					}
+				},
+				{
+					"name": "Get Assurance By ID",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/assurances/1", "host": ["{{baseUrl}}"], "path": ["api", "assurances", "1"]}
+					}
+				},
+				{
+					"name": "Get Assurances By Patient",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "GET",
+						"url": {"raw": "{{baseUrl}}/api/assurances/patient/1", "host": ["{{baseUrl}}"], "path": ["api", "assurances", "patient", "1"]}
+					}
+				},
+				{
+					"name": "Create Assurance",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "POST",
+						"url": {"raw": "{{baseUrl}}/api/assurances?patientId=1&nomAssurance=CNSS&numeroContrat=CNSS-2025-001&tauxCouverture=70", "host": ["{{baseUrl}}"], "path": ["api", "assurances"], "query": [{"key": "patientId", "value": "1"}, {"key": "nomAssurance", "value": "CNSS"}, {"key": "numeroContrat", "value": "CNSS-2025-001"}, {"key": "tauxCouverture", "value": "70"}]}
+					}
+				},
+				{
+					"name": "Update Assurance",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "PUT",
+						"url": {"raw": "{{baseUrl}}/api/assurances/1?nomAssurance=CNSS&numeroContrat=CNSS-2025-001-UPDATED&tauxCouverture=80", "host": ["{{baseUrl}}"], "path": ["api", "assurances", "1"], "query": [{"key": "nomAssurance", "value": "CNSS"}, {"key": "numeroContrat", "value": "CNSS-2025-001-UPDATED"}, {"key": "tauxCouverture", "value": "80"}]}
+					}
+				},
+				{
+					"name": "Delete Assurance",
+					"request": {
+						"auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+						"method": "DELETE",
+						"url": {"raw": "{{baseUrl}}/api/assurances/1", "host": ["{{baseUrl}}"], "path": ["api", "assurances", "1"]}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{"key": "baseUrl", "value": "http://localhost:8080", "type": "string"},
+		{"key": "token", "value": "", "type": "string"},
+		{"key": "username", "value": "", "type": "string"},
+		{"key": "patientToken", "value": "", "type": "string"},
+		{"key": "patientId", "value": "1", "type": "string"}
+	]
+}

@@ -1,0 +1,49 @@
+# ============================================================================
+# HIS - Kustomize TEST Environment
+# ============================================================================
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: his-test
+
+bases:
+  - ../../base
+
+namePrefix: test-
+
+commonLabels:
+  environment: test
+  version: test
+
+replicas:
+  - name: hub
+    count: 2
+  - name: front
+    count: 2
+
+images:
+  - name: ghcr.io/YOUR_ORG/his-hub
+    newTag: release
+  - name: ghcr.io/YOUR_ORG/his-front
+    newTag: release
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: his-test.example.com
+      - op: replace
+        path: /spec/rules/1/host
+        value: api-test.example.com
+    target:
+      kind: Ingress
+      name: his-ingress
+
+configMapGenerator:
+  - name: hub-config
+    behavior: merge
+    literals:
+      - SPRING_PROFILES_ACTIVE=test
+      - LOGGING_LEVEL_COM_HIS=INFO
+

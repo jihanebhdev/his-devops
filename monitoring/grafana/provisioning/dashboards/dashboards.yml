@@ -1,0 +1,18 @@
+# ============================================================================
+# HIS - Grafana Dashboard Provisioning
+# ============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: 'HIS Dashboards'
+    orgId: 1
+    folder: 'HIS'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true
+

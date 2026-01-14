@@ -1,0 +1,201 @@
+# ============================================================================
+# HIS DevOps - Docker Compose
+# Complete stack deployment
+# ============================================================================
+
+version: '3.8'
+
+networks:
+  his-network:
+    driver: bridge
+    name: his-network
+
+volumes:
+  mysql-data:
+    name: his-mysql-data
+  prometheus-data:
+    name: his-prometheus-data
+  grafana-data:
+    name: his-grafana-data
+
+services:
+  # ============================================================================
+  # DATABASE - MySQL 8.0
+  # ============================================================================
+  mysql:
+    image: mysql:8.0
+    container_name: his-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-his_db}
+      MYSQL_USER: ${MYSQL_USER:-his_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-his_password}
+      TZ: UTC
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - his-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  # ============================================================================
+  # BACKEND - Spring Boot Hub
+  # ============================================================================
+  hub:
+    build:
+      context: ./hub/hub
+      dockerfile: Dockerfile
+    image: his-hub:latest
+    container_name: his-hub
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-his_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-his_user}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-his_password}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SERVER_PORT: 8080
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,prometheus
+      JAVA_OPTS: -Xms256m -Xmx512m -XX:+UseG1GC
+    ports:
+      - "${HUB_PORT:-8080}:8080"
+    networks:
+      - his-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "com.his.service=hub"
+      - "com.his.environment=${ENVIRONMENT:-dev}"
+
+  # ============================================================================
+  # FRONTEND - React Application
+  # ============================================================================
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080/api}
+    image: his-front:latest
+    container_name: his-front
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080/api}
+    ports:
+      - "${FRONT_PORT:-3000}:80"
+    networks:
+      - his-network
+    depends_on:
+      - hub
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.his.service=front"
+      - "com.his.environment=${ENVIRONMENT:-dev}"
+
+  # ============================================================================
+  # MONITORING - Prometheus
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: his-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - his-network
+    depends_on:
+      - hub
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.his.service=prometheus"
+
+  # ============================================================================
+  # VISUALIZATION - Grafana
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: his-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_SERVER_ROOT_URL: ${GRAFANA_URL:-http://localhost:3001}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - his-network
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.his.service=grafana"
+
+  # ============================================================================
+  # ALERTING - AlertManager (Optional)
+  # ============================================================================
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: his-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "${ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - his-network
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+    labels:
+      - "com.his.service=alertmanager"
+
