@@ -175,6 +175,39 @@ services:
       - "com.his.service=grafana"
 
   # ============================================================================
+  # DATABASE MANAGEMENT - phpMyAdmin
+  # ============================================================================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: his-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER:-his_user}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-his_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      UPLOAD_LIMIT: 300M
+      MAX_EXECUTION_TIME: 600
+      MEMORY_LIMIT: 512M
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    networks:
+      - his-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/index.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.his.service=phpmyadmin"
+      - "com.his.environment=${ENVIRONMENT:-dev}"
+
+  # ============================================================================
   # ALERTING - AlertManager (Optional)
   # ============================================================================
   alertmanager:
