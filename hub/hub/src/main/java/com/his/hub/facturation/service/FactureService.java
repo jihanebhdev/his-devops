@@ -67,11 +67,10 @@ public class FactureService {
 
         facture.setMontantTotal(montantTotal);
 
-        
-        double tauxCouverture = (assurance != null && assurance.getTauxCouverture() != null) ? 
-            assurance.getTauxCouverture() / 100.0 : 0.0;
-        facture.setMontantAssurance(montantTotal * tauxCouverture);
-        facture.setMontantPatient(montantTotal - facture.getMontantAssurance());
+
+
+        facture.setMontantAssurance(0.0);
+        facture.setMontantPatient(montantTotal);
 
         Facture saved = factureRepository.save(facture);
         return toDTO(saved);

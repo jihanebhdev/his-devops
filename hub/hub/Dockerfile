@@ -1,9 +1,3 @@
-# ============================================================================
-# HIS Hub - Multi-stage Docker Build
-# Spring Boot Backend
-# ============================================================================
-
-# Stage 1: Build Stage
 FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 
 LABEL maintainer="HIS DevOps Team"
